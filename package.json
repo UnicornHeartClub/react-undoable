@@ -1,6 +1,6 @@
 {
   "name": "react-undoable",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Easily undo/redo any state in React, no external dependencies",
   "scripts": {
     "prepublish": "npm test",
