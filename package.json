@@ -1,0 +1,10 @@
+{
+  "name": "react-undoable",
+  "version": "0.0.1",
+  "description": "Easily undo/redo any state in React, no external dependencies",
+  "main": "index.js",
+  "types": "dist/index.d.ts",
+  "author": "Unicorn Heart Club",
+  "license": "MIT",
+  "repository": "github:UnicornHeartClub/react-undoable"
+}
