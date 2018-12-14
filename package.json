@@ -2,9 +2,31 @@
   "name": "react-undoable",
   "version": "0.0.1",
   "description": "Easily undo/redo any state in React, no external dependencies",
+  "scripts": {
+    "prepublish": "npm test",
+    "build": "tsc && uglifyjs  dist/index.js --compress --mangle -o dist/index.js --source-map \"filename='dist/index.js.map'\"",
+    "test": "jest",
+    "test:dev": "jest --watch"
+  },
   "main": "index.js",
   "types": "dist/index.d.ts",
   "author": "Unicorn Heart Club",
   "license": "MIT",
-  "repository": "github:UnicornHeartClub/react-undoable"
+  "repository": "github:UnicornHeartClub/react-undoable",
+  "devDependencies": {
+    "@types/enzyme": "^3.1.15",
+    "@types/enzyme-adapter-react-16": "^1.0.3",
+    "@types/jest": "^23.3.10",
+    "@types/react": "^16.7.17",
+    "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.7.1",
+    "enzyme-to-json": "^3.3.5",
+    "jest": "^23.6.0",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.2.2",
+    "uglify-js": "^3.4.9"
+  },
+  "dependencies": {}
 }

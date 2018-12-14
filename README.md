@@ -29,7 +29,7 @@ This library exposes a default `Undoable` component that is used to manage the s
 
 ```typescript
 import React, { PureComponent } from 'react'
-import Undoable, { IWithUndoable } from 'react-undoable'
+import Undoable, { IUndoable } from 'react-undoable'
 import ReactDOM from 'react-dom'
 
 /**
@@ -62,27 +62,37 @@ const initialState IMyComponentState = {
  */
 class MyComponent extends PureComponent<IMyComponentProps> {
   /**
-   * Count Up - This demonstrates pushing a complete state to the stack
+   * Count up - This demonstrates pushing a complete state to the stack
    */
-  up = (): IMyComponentState => {
+  up = () => {
     // We get "currentState" and "pushState" props from our `Undoable`
     const { currentState, pushState } = this.props
     // Do not call setState, but instead push the state
     return pushState({
-      ...this.currentState,
-      count: this.currentState.count + 1,
+      ...currentState,
+      count: currentState.count + 1,
     })
   }
 
   /**
-   * Count Down - This demonstrates pushing an incomplete state to the stack and merging it
+   * Count down
    */
-  down = (): object => {
-    // Similar to the .up method, we also get the "mergeState" props
-    const { currentState, mergeState } = this.props
-    // Merge the current state
-    return mergeState({
-      count: this.currentState.count - 1,
+  down = () => {
+    const { currentState, pushState } = this.props
+    return pushState({
+      ...currentState,
+      count: currentState.count - 1,
+    })
+  }
+
+  /**
+   * Generate random number - Will update the state but will not be reflected in an undo/redo
+   */
+  random = () => {
+    const { currentState, updateState } = this.props
+    return updateState({
+      ...currentState,
+      count: currentState.count - 1,
     })
   }
 
@@ -98,9 +108,7 @@ class MyComponent extends PureComponent<IMyComponentProps> {
           {` | `}
           <a onClick={this.down}>Down</a>
           {` | `}
-          <a onClick={this.updateUp}>Update Up</a>
-          {` | `}
-          <a onClick={this.updateDown}>Update Down</a>
+          <a onClick={this.random}>Random</a>
         </div>
         <div>
           <a onClick={undo}>Undo</a>
