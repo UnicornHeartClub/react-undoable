@@ -1,4 +1,4 @@
-# React Undoable
+# react-undoable 🔄
 
 ![npm](https://img.shields.io/npm/v/react-undoable.svg)
 ![david-dm](https://david-dm.org/UnicornHeartClub/react-undoable.svg)
