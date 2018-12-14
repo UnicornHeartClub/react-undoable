@@ -25,9 +25,9 @@ const TestComponent: React.SFC<IUndoable<ITestComponentState>> = props => {
       <a id="redo" onClick={redo}>
         Redo
       </a>
-      <span id="a">{currentState.microphone}</span>
-      <span id="b">{currentState.num}</span>
-      <span id="c">{currentState.test}</span>
+      <span id="a">{currentState && currentState.microphone}</span>
+      <span id="b">{currentState && currentState.num}</span>
+      <span id="c">{currentState && currentState.test}</span>
     </>
   )
 }
