@@ -4,3 +4,4 @@ src/
 *.json
 LICENSE
 jest.*
+yarn.lock
