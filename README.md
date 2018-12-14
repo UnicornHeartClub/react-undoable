@@ -181,6 +181,15 @@ Redo a previous undone state.
 
 Reset the state stack so there are no undos/redos.
 
+## Use Cases
+
+[Astral TableTop](https://www.astraltabletop.com) allows Game Masters to build feature-rich
+dungeons and maps using a "Map Builder", a feature which resembles many familiar photo editing
+interfaces and contains basic functionality such as undo/redo for editing actions. This library
+allows developers to create undo/redo functionality for any React Component with minimal overhead.
+
+We open-sourced this library in hopes that other projects might find it useful 💙
+
 ## License
 
 MIT
