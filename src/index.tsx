@@ -43,13 +43,8 @@ interface IUndoableMethods<T> {
 /**
  * Undoable Interface
  */
-export interface IUndoable<T> {
+export interface IUndoable<T> extends IUndoableMethods<T> {
   currentState?: T
-  pushState(state: T): void
-  redo(): T | undefined
-  resetState(state?: T): void
-  undo(): T | undefined
-  updateState(state: T): void
 }
 
 /**
