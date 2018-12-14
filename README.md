@@ -138,6 +138,49 @@ const App = () => (
 ReactDOM.render(App, '#app')
 ```
 
+## API
+
+react-undoable exposes a small API to use in your child components.
+
+### `<Undoable />`
+
+Initializes the main Undoable component that manages state. Renders a child function that passed
+the different state trees and methods to manage state.
+
+#### Props
+
+```typescript
+interface IUndoableProps<T> {
+  initialState: T
+  children(props: IUndoableState<T> & IUndoableMethods<T>): React.ReactNode
+}
+```
+
+#### Methods
+
+The Undoable component passes down the following methods in the child function.
+
+##### pushState(state: T): void
+
+Pushes a new state to the stack. This tracks the change so it can be undone or redone.
+
+##### updateState(state: T): void
+
+Update the state but **do not track the change**. This is useful for when you want to update the
+state but do not want undo/redo to apply the previous change (e.g. highlighting a selected layer)
+
+##### undo(): void
+
+Undo the current state and replace with the previously tracked state.
+
+##### redo(): void
+
+Redo a previous undone state.
+
+##### resetState(): void
+
+Reset the state stack so there are no undos/redos.
+
 ## License
 
 MIT
