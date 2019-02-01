@@ -4,7 +4,7 @@
 ![david-dm](https://david-dm.org/UnicornHeartClub/react-undoable.svg)
 [![Build Status](https://travis-ci.com/UnicornHeartClub/react-undoable.svg?branch=master)](https://travis-ci.com/UnicornHeartClub/react-undoable)
 
-Easily undo/redo any state in React, no external dependencies.
+Easily undo/redo any state in React, no redux required.
 
 ![minified size](https://badgen.net/bundlephobia/min/react-undoable)
 ![minzipped size](https://badgen.net/bundlephobia/minzip/react-undoable)
