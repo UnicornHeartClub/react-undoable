@@ -28,7 +28,7 @@ This library exposes a default `Undoable` component that is used to manage the s
 ### Example
 
 ```typescript
-import React, { PureComponent } from 'react'
+import * as React from 'react'
 import Undoable, { IUndoable } from 'react-undoable'
 import ReactDOM from 'react-dom'
 
@@ -60,7 +60,7 @@ const initialState IMyComponentState = {
  * management to the `Undoable` component. Optionally, we can define our supposed state
  * using TypeScript for easier management.
  */
-class MyComponent extends PureComponent<IMyComponentProps> {
+class MyComponent extends React.Component<IMyComponentProps> {
   /**
    * Count up - This demonstrates pushing a complete state to the stack
    */
