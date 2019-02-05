@@ -26,6 +26,9 @@
 import * as React from 'react'
 import * as deepMerge from 'deepmerge'
 
+// Overwrite array values by default
+const arrayMerge = (destinationArray: any, sourceArray: any[], options: any) => sourceArray
+
 /**
  * Props
  */
@@ -64,9 +67,7 @@ interface IUndoableState<T> {
 /**
  * Partial State
  */
-type Partial<T> = {
-   [P in keyof T]?: T[P];
-}
+type Partial<T> = { [P in keyof T]?: T[P] }
 
 /**
  * Undoable Enhancer
@@ -145,7 +146,7 @@ export default class Undoable<T> extends React.Component<IUndoableProps<T>, IUnd
    */
   pushState = (state: T | Partial<T>) => {
     const { currentState, previousState } = this.state
-    const nextCurrentState = deepMerge(currentState || {}, state)
+    const nextCurrentState = deepMerge(currentState || {}, state, { arrayMerge })
     this.setState({
       currentState: nextCurrentState,
       nextState: [],
@@ -169,11 +170,13 @@ export default class Undoable<T> extends React.Component<IUndoableProps<T>, IUnd
    */
   updateState = (state: T | Partial<T>) => {
     const { currentState, nextState, previousState } = this.state
-    const nextCurrentState = deepMerge(currentState || {}, state)
+    const nextCurrentState = deepMerge(currentState || {}, state, { arrayMerge })
     this.setState({
       currentState: nextCurrentState,
-      previousState: previousState.map(stateSnapshot => deepMerge(stateSnapshot, state)),
-      nextState: nextState.map(stateSnapshot => deepMerge(stateSnapshot, state)),
+      previousState: previousState.map(stateSnapshot =>
+        deepMerge(stateSnapshot, state, { arrayMerge }),
+      ),
+      nextState: nextState.map(stateSnapshot => deepMerge(stateSnapshot, state, { arrayMerge })),
     })
   }
 
