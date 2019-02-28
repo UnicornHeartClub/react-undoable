@@ -11,23 +11,15 @@
  *
  * This means that if you have a method in your child component that modifies that child's state,
  * it's best to return an object of the new state from that method so that you can call "pushState"
- * on the Undoable. You can also treat the Undoable as a state store to avoid state duplication
- * across components.
+ * on the Undoable.
  *
- * @TODO Issue #1
- * Updating the state performs a deep comparison and stores only the differences, similar to how git
- * might behave.
- *
- * We can then incrementally/decrementally modify the state based on the stored diffs.
+ * You can also treat the Undoable as a state store to avoid state duplication across
+ * components.
  *
  * @format
  */
 
 import * as React from 'react'
-import * as deepMerge from 'deepmerge'
-
-// Overwrite array values by default
-const arrayMerge = (destinationArray: any, sourceArray: any[], options: any) => sourceArray
 
 /**
  * Props
@@ -41,11 +33,11 @@ interface IUndoableProps<T> {
  * Methods
  */
 interface IUndoableMethods<T> {
-  pushState(state: T | Partial<T>): void
+  pushState(state: T, callback?: (props?: any) => any): void
   redo(): T | undefined
-  resetState(state?: T): void
+  resetState(state?: T, callback?: (props?: any) => any): void
   undo(): T | undefined
-  updateState(state: T | Partial<T>): void
+  updateState(state: T, callback?: (props?: any) => any): void
 }
 
 /**
@@ -63,11 +55,6 @@ interface IUndoableState<T> {
   previousState: (T | undefined)[]
   nextState: (T | undefined)[]
 }
-
-/**
- * Partial State
- */
-type Partial<T> = { [P in keyof T]?: T[P] }
 
 /**
  * Undoable Enhancer
@@ -144,40 +131,42 @@ export default class Undoable<T> extends React.Component<IUndoableProps<T>, IUnd
   /**
    * Push new state to the stack
    */
-  pushState = (state: T | Partial<T>) => {
+  pushState = (state: T, callback?: (props?: any) => any) => {
     const { currentState, previousState } = this.state
-    const nextCurrentState = deepMerge(currentState || {}, state, { arrayMerge })
-    this.setState({
-      currentState: nextCurrentState,
-      nextState: [],
-      previousState: [...previousState, currentState],
-    })
+    this.setState(
+      {
+        currentState: state,
+        nextState: [],
+        previousState: [...previousState, currentState],
+      },
+      callback,
+    )
   }
 
   /**
    * Reset the entire state to a single stack
    */
-  resetState = (state: T) => {
-    this.setState({
-      currentState: state,
-      nextState: [],
-      previousState: [],
-    })
+  resetState = (state: T, callback?: (props?: any) => any) => {
+    this.setState(
+      {
+        currentState: state,
+        nextState: [],
+        previousState: [],
+      },
+      callback,
+    )
   }
 
   /**
    * Update the state but do not push a change (useful for updating without the need to undo)
    */
-  updateState = (state: T | Partial<T>) => {
-    const { currentState, nextState, previousState } = this.state
-    const nextCurrentState = deepMerge(currentState || {}, state, { arrayMerge })
-    this.setState({
-      currentState: nextCurrentState,
-      previousState: previousState.map(stateSnapshot =>
-        deepMerge(stateSnapshot, state, { arrayMerge }),
-      ),
-      nextState: nextState.map(stateSnapshot => deepMerge(stateSnapshot, state, { arrayMerge })),
-    })
+  updateState = (state: T, callback?: (props?: any) => any) => {
+    this.setState(
+      {
+        currentState: state,
+      },
+      callback,
+    )
   }
 
   /**

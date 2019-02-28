@@ -7,24 +7,12 @@ interface ITestComponentState {
   microphone: string
   num: number
   test: boolean
-  deep: {
-    nested: {
-      key: string
-      update?: boolean
-    }
-  }
 }
 
 const defaultState = {
   microphone: 'check',
   num: 2,
   test: true,
-  deep: {
-    nested: {
-      key: 'value',
-      update: false,
-    },
-  },
 }
 
 const TestComponent: React.SFC<IUndoable<ITestComponentState>> = props => {
@@ -55,6 +43,54 @@ describe('@enhancers/undoable', () => {
     expect(Component.find('#c').prop('children')).toEqual(true)
   })
 
+  it('performs undo operations and updates the state', () => {
+    const Component = mount(
+      <Undoable initialState={defaultState}>{props => <TestComponent {...props} />}</Undoable>,
+    )
+
+    // change the state
+    const instance = Component.find(Undoable).instance() as Undoable<ITestComponentState>
+    instance.pushState({ ...defaultState, num: 10, test: false })
+
+    expect(Component.find(Undoable).state('currentState').test).toEqual(false)
+    expect(Component.find(Undoable).state('currentState').num).toEqual(10)
+
+    // change it back
+    Component.find('#undo').simulate('click')
+
+    // we should have future state
+    expect(Component.find(Undoable).state('currentState').test).toEqual(true)
+    expect(Component.find(Undoable).state('currentState').num).toEqual(2)
+    expect(Component.find(Undoable).state('nextState')).toHaveLength(1)
+    expect(Component.find(Undoable).state('nextState')[0]).toEqual({
+      ...defaultState,
+      test: false,
+      num: 10,
+    })
+  })
+
+  it('performs redo operations and updates the state', () => {
+    const Component = mount(
+      <Undoable initialState={defaultState}>{props => <TestComponent {...props} />}</Undoable>,
+    )
+
+    // change the state
+    const instance = Component.find(Undoable).instance() as Undoable<ITestComponentState>
+    instance.pushState({ ...defaultState, num: 10, test: false })
+
+    // change it back to the original
+    Component.find('#undo').simulate('click')
+
+    // change it back to our changes
+    Component.find('#redo').simulate('click')
+
+    expect(Component.find(Undoable).state('currentState').test).toEqual(false)
+    expect(Component.find(Undoable).state('currentState').num).toEqual(10)
+    expect(Component.find(Undoable).state('nextState')).toHaveLength(0)
+    expect(Component.find(Undoable).state('previousState')).toHaveLength(1)
+    expect(Component.find(Undoable).state('previousState')[0]).toEqual(defaultState)
+  })
+
   describe('.redo', () => {
     it('returns the next state', () => {
       const Component = mount(
@@ -71,28 +107,6 @@ describe('@enhancers/undoable', () => {
       // now redo it and return the last object
       expect(instance.redo()).toEqual({ ...defaultState, num: 10, test: false })
     })
-
-    it('performs redo operations and updates the state', () => {
-      const Component = mount(
-        <Undoable initialState={defaultState}>{props => <TestComponent {...props} />}</Undoable>,
-      )
-
-      // change the state
-      const instance = Component.find(Undoable).instance() as Undoable<ITestComponentState>
-      instance.pushState({ ...defaultState, num: 10, test: false })
-
-      // change it back to the original
-      Component.find('#undo').simulate('click')
-
-      // change it back to our changes
-      Component.find('#redo').simulate('click')
-
-      expect(Component.find(Undoable).state('currentState').test).toEqual(false)
-      expect(Component.find(Undoable).state('currentState').num).toEqual(10)
-      expect(Component.find(Undoable).state('nextState')).toHaveLength(0)
-      expect(Component.find(Undoable).state('previousState')).toHaveLength(1)
-      expect(Component.find(Undoable).state('previousState')[0]).toEqual(defaultState)
-    })
   })
 
   describe('.undo', () => {
@@ -107,32 +121,6 @@ describe('@enhancers/undoable', () => {
 
       // return the last object
       expect(instance.undo()).toEqual(defaultState)
-    })
-
-    it('performs undo operations and updates the state', () => {
-      const Component = mount(
-        <Undoable initialState={defaultState}>{props => <TestComponent {...props} />}</Undoable>,
-      )
-
-      // change the state
-      const instance = Component.find(Undoable).instance() as Undoable<ITestComponentState>
-      instance.pushState({ ...defaultState, num: 10, test: false })
-
-      expect(Component.find(Undoable).state('currentState').test).toEqual(false)
-      expect(Component.find(Undoable).state('currentState').num).toEqual(10)
-
-      // change it back
-      Component.find('#undo').simulate('click')
-
-      // we should have future state
-      expect(Component.find(Undoable).state('currentState').test).toEqual(true)
-      expect(Component.find(Undoable).state('currentState').num).toEqual(2)
-      expect(Component.find(Undoable).state('nextState')).toHaveLength(1)
-      expect(Component.find(Undoable).state('nextState')[0]).toEqual({
-        ...defaultState,
-        test: false,
-        num: 10,
-      })
     })
   })
 
@@ -153,28 +141,21 @@ describe('@enhancers/undoable', () => {
       expect(Component.find(Undoable).state('previousState')[0]).toEqual(defaultState)
     })
 
-    it('pushes partial state changes', () => {
+    it('calls an optional callback', () => {
+      const callback = jest.fn()
+
       const Component = mount(
         <Undoable initialState={defaultState}>{props => <TestComponent {...props} />}</Undoable>,
       )
-
-      expect(Component.find(Undoable).state('currentState').microphone).toEqual('check')
-      expect(Component.find(Undoable).state('previousState')).toHaveLength(0)
-
       const instance = Component.find(Undoable).instance() as Undoable<ITestComponentState>
-      instance.pushState({ microphone: '123' })
+      instance.pushState({ ...defaultState, microphone: 'hi' }, callback)
 
-      expect(Component.find(Undoable).state('currentState')).toEqual({
-        ...defaultState,
-        microphone: '123',
-      })
-      expect(Component.find(Undoable).state('previousState')).toHaveLength(1)
-      expect(Component.find(Undoable).state('previousState')[0]).toEqual(defaultState)
+      expect(callback).toHaveBeenCalledTimes(1)
     })
   })
 
   describe('.updateState', () => {
-    it('updates current state but does not track the change', () => {
+    it('pushes new state changes but does not track the change', () => {
       const Component = mount(
         <Undoable initialState={defaultState}>{props => <TestComponent {...props} />}</Undoable>,
       )
@@ -189,84 +170,16 @@ describe('@enhancers/undoable', () => {
       expect(Component.find(Undoable).state('previousState')).toHaveLength(0)
     })
 
-    it('updates partial state changes', () => {
+    it('calls an optional callback', () => {
+      const callback = jest.fn()
+
       const Component = mount(
         <Undoable initialState={defaultState}>{props => <TestComponent {...props} />}</Undoable>,
       )
-
-      expect(Component.find(Undoable).state('currentState').microphone).toEqual('check')
-      expect(Component.find(Undoable).state('previousState')).toHaveLength(0)
-
       const instance = Component.find(Undoable).instance() as Undoable<ITestComponentState>
-      instance.updateState({
-        deep: {
-          nested: {
-            key: 'new value'
-          }
-        }
-      })
+      instance.updateState({ ...defaultState, microphone: 'hi' }, callback)
 
-      expect(Component.find(Undoable).state('currentState')).toEqual({
-        ...defaultState,
-        deep: {
-          nested: {
-            key: 'new value',
-            update: false,
-          },
-        },
-      })
-      expect(Component.find(Undoable).state('previousState')).toHaveLength(0)
-    })
-
-    /**
-     * @TODO Issue #1
-     * Instead of deep merging each previous/next state with the updated change, we should be only
-     * storing the diffs of each change
-     */
-    it('updates previous state to reflect updated change', () => {
-      const Component = mount(
-        <Undoable initialState={defaultState}>{props => <TestComponent {...props} />}</Undoable>,
-      )
-
-      expect(Component.find(Undoable).state('currentState').microphone).toEqual('check')
-      expect(Component.find(Undoable).state('previousState')).toHaveLength(0)
-
-      // push, update, push
-      const instance = Component.find(Undoable).instance() as Undoable<ITestComponentState>
-      instance.pushState({ microphone: 'hi' })
-      instance.pushState({ microphone: '123' })
-      instance.updateState({ num: 42 })
-
-      expect(Component.find(Undoable).state('currentState').microphone).toEqual('123')
-      expect(Component.find(Undoable).state('currentState').num).toEqual(42)
-      expect(Component.find(Undoable).state('previousState')).toHaveLength(2)
-      expect(Component.find(Undoable).state('previousState')[0]).toEqual({
-        ...defaultState,
-        num: 42,
-        microphone: 'check',
-      })
-      expect(Component.find(Undoable).state('previousState')[1]).toEqual({
-        ...defaultState,
-        num: 42,
-        microphone: 'hi',
-      })
-
-      // undo the last tracked change
-      instance.undo()
-
-      expect(Component.find(Undoable).state('currentState').num).toEqual(42)
-      expect(Component.find(Undoable).state('currentState').microphone).toEqual('hi')
-      expect(Component.find(Undoable).state('nextState')[0]).toEqual({
-        ...defaultState,
-        num: 42,
-        microphone: '123',
-      })
-
-      // redo
-      instance.redo()
-
-      expect(Component.find(Undoable).state('currentState').num).toEqual(42)
-      expect(Component.find(Undoable).state('currentState').microphone).toEqual('123')
+      expect(callback).toHaveBeenCalledTimes(1)
     })
   })
 })
